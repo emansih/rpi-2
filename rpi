@@ -129,7 +129,7 @@ chroot $R apt-add-repository -y ppa:fo0bar/rpi2
 chroot $R apt-get update
 
 # Standard packages
-chroot $R apt-get -y install ubuntu-standard initramfs-tools raspberrypi-bootloader-nokernel rpi2-ubuntu-errata language-pack-en
+chroot $R apt-get -y install ubuntu-standard initramfs-tools raspberrypi-bootloader-nokernel rpi2-ubuntu-errata language-pack-en openssh-server
 
 # Kernel installation
 # Install flash-kernel last so it doesn't try (and fail) to detect the
