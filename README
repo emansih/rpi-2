@@ -1,0 +1,9 @@
+A couple of things to iron out.This script has only been tested on Debian 8(Stretch). The script will fail at line 116(Line number will change in the future) since Debian uses ubuntu-archive-keyring and Ubuntu uses ubuntu-keyring. I am unsure what kind of package name does Ubuntu's derivatives uses. Anyway, this script will only work if you have apt-get installed on your system, therefore IT WILL FAIL on Arch Linux(makepkg(?) or PKGBUILD(?) I don't know what it's called since I don't use Arch), Redhat and it's derivatives(Fedora, CentOS, Scientic Linux and etc.), etc.
+
+
+
+									Future plans 
+1. Make a check to ensure user is running as root
+2. Replace if answer is 1 or 2 with case
+3. Ask the user if they are building on x86 or ARM platform
+4. learn how the hell to use eval to change the build directory, currently it is /home/daniel which isn't optimal at all
