@@ -27,8 +27,7 @@
 ########################################################################
 
 #set -e
-set -x
-
+#set -x
 
 # I use a local caching proxy to save time/bandwidth; in this mode, the
 # local mirror is used to download almost everything, then the standard
