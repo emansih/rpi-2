@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+#########################################################################################################
 #NOTE: RUN THIS SCRIPT AS *ROOT* even though it is dangerous, but trust me, I am the guy on the Internet
 #What can go wrong.....hehehehehe
+#########################################################################################################
 ########################################################################
 # Script modified by Daniel Quah 
 # Copyright (C) 2015 Daniel Quah <danielquah148@yahoo.com>
@@ -25,87 +27,43 @@
 ########################################################################
 
 #set -e
-#set -x
+set -x
 
 
 # I use a local caching proxy to save time/bandwidth; in this mode, the
 # local mirror is used to download almost everything, then the standard
 # http://ports.ubuntu.com/ is replaced at the end for distribution.
 #LOCAL_MIRROR=""
-clear
-echo "Note: This only works on Raspberry Pi 2!"
-sleep 5
-clear
-echo "                         Ubuntu Raspberry Pi 2 Build Script"
-echo "Hi there! Would you like to go with the defaults?"
-
-echo "1.Yes"
-echo "2.No(Advanced users)"
-echo -n "Pick your poison: "
-read answer
-if [ $answer -eq 2 ]; then
-echo "Alright! This is the best choice!"
-sleep 2
-clear
-echo "Which Ubuntu release would you like to use?"
-sleep 1
-echo "1. Trusty(Stable, but oldest)"
-echo "2. Utopic(Slightly updated,but old)"
-echo "3. Vivid(Latest version)"
-echo "4. Wily(Highly Experimental)"
-echo -n "Choice: "
-read response
-
-if [ $response -eq 1 ]; then
-RELEASE=trusty
-BASEDIR=/home/daniel/rpi2/${RELEASE}
-BUILDDIR=${BASEDIR}/build
-
-elif [ $response -eq 2 ]; then
-RELEASE=utopic
-BASEDIR=/home/daniel/rpi2/${RELEASE}
-BUILDDIR=${BASEDIR}/build
-
-elif [ $response -eq 3 ]; then
-RELEASE=vivid
-BASEDIR=/home/daniel/rpi2/${RELEASE}
-BUILDDIR=${BASEDIR}/build
-
-elif [ $response -eq 4 ]; then
-RELEASE=wily
-BASEDIR=/home/daniel/rpi2/${RELEASE}
-BUILDDIR=${BASEDIR}/build
-
-else
-echo "U wot m8"
-
+#####################
+#Colours
+bldylw=${txtbld}$(tput setaf 3) #yellow?looks like yellow to me
+bldred=${txtbld}$(tput setaf 1) # red
+txtbld=$(tput bold) # Bold
+txtrst=$(tput sgr0) # Reset
+#####################
+names()
+{
 echo -n "Hostname: "
 read $hostname
 echo -n "Username: "
 read $username
+}
 
-fi
-
-elif [ $answer -eq 1 ]; then
-
-RELEASE=trusty
-BASEDIR=/home/daniel/rpi2/${RELEASE}
-BUILDDIR=${BASEDIR}/build
-hostname=ubuntu
-username="Ubuntu user"
-fi
-
+compile()
+{
 # Don't clobber an old build
 if [ -e "$BUILDDIR" ]; then
-  echo "Previous $BUILDDIR exists!"
-  echo "Would you like to remove them?"
-  echo "1. Yes"
-  echo "2. No"
-  echo -n "Choice: "
-read removal
-	if [ $removal -eq 1 ]; then
-sudo rm -rf $BUILDDIR
-
+#  echo "Previous $BUILDDIR exists!"
+#  echo "Would you like to remove them?"
+#  echo "1. Yes"
+#  echo "2. No"
+#  echo -n "Choice: "
+#read removal
+#	if [ $removal -eq 1 ]; then
+#sudo rm -rf $BUILDDIR
+echo "$BUILDDIR exists, not proceeding"
+  exit 1
+fi
 export TZ=UTC
 R=${BUILDDIR}/chroot
 mkdir -p $R
@@ -355,9 +313,101 @@ if which bmaptool; then
   bmaptool create -o "$BASEDIR/${DATE}-ubuntu-${RELEASE}.bmap" "$BASEDIR/${DATE}-ubuntu-${RELEASE}.img"
 
 fi
-elif [ $removal -eq 2 ]; then
-echo "Bye bye!"
-  exit 1
-fi
-fi
+#elif [ $removal -eq 2 ]; then
+#echo "Bye bye!"
+#  exit 1
+#fi
+#fi
+
+}
 # Done!
+
+clear
+echo "${bldylw}Warning:${txtrst} This only builds for Pi 2! Building for Pi 1 ${bldylw}WILL NOT${txtrst} WORK!"
+#sleep 5
+clear
+#Run some checks
+	{
+	mkdir /usr/src/rpi2
+	
+	if [ -e /usr/src/rpi2 ]; then
+	echo ""
+	rm -rf /usr/src/rpi2
+	else 
+	echo "${bldred}Error:${txtrst} You aren't running as root" 
+	exit
+	fi
+		
+	if [ -e /etc/apt ]; then
+	echo ""
+	else
+	echo "${bldred}Error:${txtrst} You don't have apt, gonna quit now."
+	exit
+	fi
+	}	
+	
+	
+clear
+echo "                         Ubuntu Raspberry Pi 2 Build Script"
+echo ""
+echo "Hi there! Would you like to go with the defaults?"
+echo ""
+	echo "1.Yes"
+		echo "2.No(Advanced users)"
+echo ""
+echo -n "Pick your poison: "
+read answer
+	
+		if [ $answer -eq 2 ]; then
+echo "Alright! This is the best choice!"
+#sleep 1
+clear
+echo "Which Ubuntu release would you want to use?"
+echo ""
+echo "1. Trusty(Stable but old)" 
+echo "2. Utopic(Slightly more updated but unsupported)"
+echo "3. Vivid(Latest release)"
+echo "4. Wily(Highly experimental)"
+echo ""
+echo -n "Pick your poison: "
+read version
+
+		if [ $version -eq 1 ]; then
+RELEASE=trusty
+BASEDIR=/usr/src/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+names
+compile
+		elif [ $version -eq 2 ]; then
+RELEASE=utopic
+BASEDIR=/usr/src/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+names
+compile
+		elif [ $version -eq 3 ]; then
+RELEASE=vivid
+BASEDIR=/usr/src/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+names
+compile
+		elif [ $version -eq 4 ]; then
+RELEASE=wily
+BASEDIR=/usr/src/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+names
+compile
+		else
+echo "U wot m8"
+
+fi
+
+	elif [ $answer -eq 1 ]; then
+RELEASE=trusty
+BASEDIR=/usr/src/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+hostname=ubuntu
+username="Ubuntu user"
+compile
+fi
+
+
