@@ -2,7 +2,7 @@ A couple of things to iron out.This script has only been tested on Debian 8(Stre
 
 
 
-									Future plans 
+					Future plans 
 1. Make a check to ensure user is running as root
 2. Replace if answer is 1 or 2 with case
 3. Ask the user if they are building on x86 or ARM platform
