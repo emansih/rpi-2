@@ -1,5 +1,6 @@
 #!/bin/sh
-
+#NOTE: RUN THIS SCRIPT AS *ROOT* even though it is dangerous, but trust me, I am the guy on the Internet
+#What can go wrong.....hehehehehe
 ########################################################################
 # Script modified by Daniel Quah 
 # Copyright (C) 2015 Daniel Quah <danielquah148@yahoo.com>
@@ -26,37 +27,97 @@
 #set -e
 #set -x
 
-RELEASE=vivid
-BASEDIR=/home/daniel/rpi2/${RELEASE}
-BUILDDIR=${BASEDIR}/build
+
 # I use a local caching proxy to save time/bandwidth; in this mode, the
 # local mirror is used to download almost everything, then the standard
 # http://ports.ubuntu.com/ is replaced at the end for distribution.
 #LOCAL_MIRROR=""
+clear
+echo "Note: This only works on Raspberry Pi 2!"
+sleep 5
+clear
+echo "                         Ubuntu Raspberry Pi 2 Build Script"
+echo "Hi there! Would you like to go with the defaults?"
+
+echo "1.Yes"
+echo "2.No(Advanced users)"
+echo -n "Pick your poison: "
+read answer
+if [ $answer -eq 2 ]; then
+echo "Alright! This is the best choice!"
+sleep 2
+clear
+echo "Which Ubuntu release would you like to use?"
+sleep 1
+echo "1. Trusty(Stable, but oldest)"
+echo "2. Utopic(Slightly updated,but old)"
+echo "3. Vivid(Latest version)"
+echo "4. Wily(Highly Experimental)"
+echo -n "Choice: "
+read response
+
+if [ $response -eq 1 ]; then
+RELEASE=trusty
+BASEDIR=/home/daniel/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+
+elif [ $response -eq 2 ]; then
+RELEASE=utopic
+BASEDIR=/home/daniel/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+
+elif [ $response -eq 3 ]; then
+RELEASE=vivid
+BASEDIR=/home/daniel/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+
+elif [ $response -eq 4 ]; then
+RELEASE=wily
+BASEDIR=/home/daniel/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+
+else
+echo "U wot m8"
+
+echo -n "Hostname: "
+read $hostname
+echo -n "Username: "
+read $username
+
+fi
+
+elif [ $answer -eq 1 ]; then
+
+RELEASE=trusty
+BASEDIR=/home/daniel/rpi2/${RELEASE}
+BUILDDIR=${BASEDIR}/build
+hostname=ubuntu
+username="Ubuntu user"
+fi
 
 # Don't clobber an old build
-# But I want to clobber an old build and you can't stop me
-
 if [ -e "$BUILDDIR" ]; then
-clear
-  echo "$BUILDDIR exists!"
-  read -r -p "Would you like to remove $BUILDDIR ?[y/N]" response
-case $response in
-	[yY][eE][sS]|[yY])
-	sudo rm -rf $BUILDDIR
-	
+  echo "Previous $BUILDDIR exists!"
+  echo "Would you like to remove them?"
+  echo "1. Yes"
+  echo "2. No"
+  echo -n "Choice: "
+read removal
+	if [ $removal -eq 1 ]; then
+sudo rm -rf $BUILDDIR
 
-# Set up environment
 export TZ=UTC
 R=${BUILDDIR}/chroot
 mkdir -p $R
 
 # Base debootstrap
-apt-get -y install ubuntu-archive-keyring
+sudo apt-get install ubuntu-archive-keyring qemu-user-static
 if [ -n "$LOCAL_MIRROR" ]; then
-  qemu-debootstrap --arch armhf $RELEASE $R $LOCAL_MIRROR
+qemu-debootstrap --arch armhf $RELEASE $R http://ports.ubuntu.com/
+
 else
-  qemu-debootstrap --arch armhf $RELEASE $R http://ports.ubuntu.com/
+qemu-debootstrap --arch armhf $RELEASE $R http://ports.ubuntu.com/
+
 fi
 
 # Mount required filesystems
@@ -111,7 +172,7 @@ chroot $R apt-add-repository -y ppa:fo0bar/rpi2
 chroot $R apt-get update
 
 # Standard packages
-chroot $R apt-get -y install ubuntu-standard initramfs-tools raspberrypi-bootloader-nokernel rpi2-ubuntu-errata language-pack-en openssh-server libraspberrypi-bin libraspberrypi-dev
+chroot $R apt-get -y install ubuntu-standard initramfs-tools raspberrypi-bootloader-nokernel rpi2-ubuntu-errata language-pack-en
 
 # Kernel installation
 # Install flash-kernel last so it doesn't try (and fail) to detect the
@@ -133,7 +194,7 @@ proc            /proc           proc    defaults          0       0
 EOM
 
 # Set up hosts
-echo rpi >$R/etc/hostname
+echo $hostname >$R/etc/hostname
 cat <<EOM >$R/etc/hosts
 127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
@@ -144,7 +205,7 @@ ff02::2         ip6-allrouters
 EOM
 
 # Set up default user
-chroot $R adduser --gecos "Ubuntu user" --add_extra_groups --disabled-password ubuntu
+chroot $R adduser --gecos $username --add_extra_groups --disabled-password ubuntu
 chroot $R usermod -a -G sudo,adm -p '$6$iTPEdlv4$HSmYhiw2FmvQfueq32X30NqsYKpGDoTAUV2mzmHEgP/1B7rV3vfsjZKnAWn6M2d.V2UsPuZ2nWHg1iqzIu/nF/' ubuntu
 
 # Restore standard sources.list if a local mirror was used
@@ -227,7 +288,7 @@ cat <<EOM >$R/boot/firmware/config.txt
 #sdtv_mode=2
 
 #uncomment to overclock the arm. 700 MHz is the default.
-#arm_freq=700
+#arm_freq=800
 EOM
 ln -sf firmware/config.txt $R/boot/config.txt
 echo 'dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootwait' > $R/boot/firmware/cmdline.txt
@@ -292,14 +353,11 @@ losetup -d "$EXT4_LOOP"
 losetup -d "$VFAT_LOOP"
 if which bmaptool; then
   bmaptool create -o "$BASEDIR/${DATE}-ubuntu-${RELEASE}.bmap" "$BASEDIR/${DATE}-ubuntu-${RELEASE}.img"
-fi
 
-;;
-*)
-	echo "Exiting!"
-	;;
-esac
+fi
+elif [ $removal -eq 2 ]; then
+echo "Bye bye!"
   exit 1
 fi
- 
+fi
 # Done!
