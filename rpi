@@ -328,11 +328,11 @@ echo "${bldylw}Warning:${txtrst} This only builds for Pi 2! Building for Pi 1 ${
 clear
 #Run some checks
 	{
-	mkdir /usr/src/rpi2
+	mkdir /usr/src/rpi2/daniel
 	
-	if [ -e /usr/src/rpi2 ]; then
+	if [ -e /usr/src/rpi2/daniel ]; then
 	echo ""
-	rm -rf /usr/src/rpi2
+	rm -rf /usr/src/rpi2/daniel
 	else 
 	echo "${bldred}Error:${txtrst} You aren't running as root" 
 	exit
@@ -344,6 +344,8 @@ clear
 	echo "${bldred}Error:${txtrst} You don't have apt, gonna quit now."
 	exit
 	fi
+
+
 	}	
 	
 	
