@@ -69,7 +69,11 @@ R=${BUILDDIR}/chroot
 mkdir -p $R
 
 # Base debootstrap
-sudo apt-get install ubuntu-archive-keyring qemu-user-static
+
+if [ $compiling_on_debian ] ; then
+sudo apt-get install ubuntu-archive-keyring qemu-user-static 
+fi
+
 if [ -n "$LOCAL_MIRROR" ]; then
 qemu-debootstrap --arch armhf $RELEASE $R http://ports.ubuntu.com/
 
@@ -324,12 +328,13 @@ fi
 
 check()
 {
-mkdir /usr/src/rpi2/daniel
+mkdir -p /usr/src/rpi2/daniel/
 	
-	if [ -e /usr/src/rpi2/daniel ]; then
+	if [ -e /usr/src/rpi2/daniel/ ]; then
 	echo ""
-	rm -rf /usr/src/rpi2/daniel
+	rm -rf /usr/src/rpi2/daniel/
 	else 
+#	clear
 	echo "${bldred}Error:${txtrst} You aren't running as root" 
 	exit
 	fi
@@ -345,10 +350,26 @@ mkdir /usr/src/rpi2/daniel
 
 if [ "$amd64_hardware" = "$AMD64_HARDWARE" ] ; then
 	echo ""
+	
  	else 
 #have you tried compiling on your toaster though?	
-	echo "${bldred}Error:${txtrst} Currently unsupported"
-	exit
+	echo "${bldred}Error:${txtrst} $(uname -m) is currently unsupported"
+	exits
+fi
+
+#alright! all checks passed
+check=$(grep GNU/Linux /etc/issue | cut -d " " -f 1)
+
+if [ Debian = $check ] ; then	
+$compiling_on_debian
+ 	elif [ Ubuntu = $check ] ; then
+$compiling_on_ubuntu
+
+	else
+	echo "${bldylw}Warning:${txtrst} compiling on your distribution is not suppported" 
+	echo "We will still carry on..."
+	$compiling_on_ubuntu
+sleep 5
 fi	
 }
 ###################
@@ -356,7 +377,7 @@ fi
 ###################
 clear
 echo "${bldylw}Warning:${txtrst} This only builds for Pi 2! Building for Pi 1 ${bldylw}WILL NOT${txtrst} WORK!"
-#sleep 5
+sleep 5
 clear
 check
 	
@@ -373,7 +394,7 @@ read ANSWER
 	
 		if [ $ANSWER -eq 2 ]; then
 echo "Alright! This is the best choice!"
-#sleep 1
+sleep 1
 clear
 echo "Which Ubuntu release would you want to use?"
 echo ""
