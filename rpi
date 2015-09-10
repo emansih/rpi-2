@@ -322,13 +322,9 @@ fi
 }
 # Done!
 
-clear
-echo "${bldylw}Warning:${txtrst} This only builds for Pi 2! Building for Pi 1 ${bldylw}WILL NOT${txtrst} WORK!"
-#sleep 5
-clear
-#Run some checks
-	{
-	mkdir /usr/src/rpi2/daniel
+check()
+{
+mkdir /usr/src/rpi2/daniel
 	
 	if [ -e /usr/src/rpi2/daniel ]; then
 	echo ""
@@ -344,10 +340,25 @@ clear
 	echo "${bldred}Error:${txtrst} You don't have apt, gonna quit now."
 	exit
 	fi
+	AMD64_HARDWARE="x86_64"
+	amd64_hardware=$(uname -m)
 
-
-	}	
-	
+if [ "$amd64_hardware" = "$AMD64_HARDWARE" ] ; then
+	echo ""
+ 	else 
+#have you tried compiling on your toaster though?	
+	echo "${bldred}Error:${txtrst} Currently unsupported"
+	exit
+fi	
+}
+###################
+#Script starts here
+###################
+clear
+echo "${bldylw}Warning:${txtrst} This only builds for Pi 2! Building for Pi 1 ${bldylw}WILL NOT${txtrst} WORK!"
+#sleep 5
+clear
+check
 	
 clear
 echo "                         Ubuntu Raspberry Pi 2 Build Script"
@@ -358,9 +369,9 @@ echo ""
 		echo "2.No(Advanced users)"
 echo ""
 echo -n "Pick your poison: "
-read answer
+read ANSWER
 	
-		if [ $answer -eq 2 ]; then
+		if [ $ANSWER -eq 2 ]; then
 echo "Alright! This is the best choice!"
 #sleep 1
 clear
@@ -372,27 +383,27 @@ echo "3. Vivid(Latest release)"
 echo "4. Wily(Highly experimental)"
 echo ""
 echo -n "Pick your poison: "
-read version
+read VERSION
 
-		if [ $version -eq 1 ]; then
+		if [ $VERSION -eq 1 ]; then
 RELEASE=trusty
 BASEDIR=/usr/src/rpi2/${RELEASE}
 BUILDDIR=${BASEDIR}/build
 names
 compile
-		elif [ $version -eq 2 ]; then
+		elif [ $VERSION -eq 2 ]; then
 RELEASE=utopic
 BASEDIR=/usr/src/rpi2/${RELEASE}
 BUILDDIR=${BASEDIR}/build
 names
 compile
-		elif [ $version -eq 3 ]; then
+		elif [ $VERSION -eq 3 ]; then
 RELEASE=vivid
 BASEDIR=/usr/src/rpi2/${RELEASE}
 BUILDDIR=${BASEDIR}/build
 names
 compile
-		elif [ $version -eq 4 ]; then
+		elif [ $VERSION -eq 4 ]; then
 RELEASE=wily
 BASEDIR=/usr/src/rpi2/${RELEASE}
 BUILDDIR=${BASEDIR}/build
@@ -403,7 +414,7 @@ echo "U wot m8"
 
 fi
 
-	elif [ $answer -eq 1 ]; then
+	elif [ $ANSWER -eq 1 ]; then
 RELEASE=trusty
 BASEDIR=/usr/src/rpi2/${RELEASE}
 BUILDDIR=${BASEDIR}/build
